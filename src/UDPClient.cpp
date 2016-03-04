@@ -15,26 +15,34 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
+#include <iostream>
+#include <fstream>
+#include "packet.h"
 
 using namespace std;
 
 int main(int argc, char **argv) {
-	int sd;
-	struct sockaddr_in server;
-	struct hostent *hp;
+//	int sd;
+//	struct sockaddr_in server;
+//	struct hostent *hp;
+//
+//	sd = socket(AF_INET, SOCK_DGRAM, 0);
+//
+//	server.sin_family = AF_INET;
+//	server.sin_port = htons(12345);
+//	hp = gethostbyname(argv[1]);
+//	bcopy(hp->h_addr, &(server.sin_addr), hp->h_length);
+//
+//	for(;;) {
+//		sendto(sd, "HI", 2, 0, (struct sockaddr *) &server, sizeof(server));
+//		sleep(2);
+//	}
+//	close(sd);
 
-	sd = socket(AF_INET, SOCK_DGRAM, 0);
+	struct Packet pair;
 
-	server.sin_family = AF_INET;
-	server.sin_port = htons(12345);
-	hp = gethostbyname(argv[1]);
-	bcopy(hp->h_addr, &(server.sin_addr), hp->h_length);
-
-	for(;;) {
-		sendto(sd, "HI", 2, 0, (struct sockaddr *) &server, sizeof(server));
-		sleep(2);
-	}
-	close(sd);
+	pair.info = "help me";
+	cout << pair.info << endl;
 	return 0;
 }
 
