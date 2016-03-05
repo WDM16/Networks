@@ -140,6 +140,7 @@ int main(int argc, char** argv) {
     unsigned char dataPull[PAKSIZE - 7 + 1];
     //Wait for a message from the client to see if the packet was received correctly
     rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&server, &calen);
+    packet[rlen] = '\0';
 
     if(!isSeqNumSet) {
       isSeqNumSet = true;
@@ -177,7 +178,7 @@ int main(int argc, char** argv) {
         cout << "ACK" << endl;
       }
       else {
- 	cout << "NAK" << endl;
+ 	      cout << "NAK" << endl;
       }
       Packet p;
       if (seqNum) {

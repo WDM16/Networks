@@ -171,6 +171,8 @@ int main(int argc, char** argv) {
             //Wait for a message from the client to see if the packet was received correctly
             rlen = recvfrom(s, b, BUFSIZE + 7, 0, (struct sockaddr *) &client, &salen);
             char * ack = new char[3];
+            
+            b[rlen] = '\0';
 
             cout << endl << "=== SERVER RESPONSE TEST" << endl;
             cout << "Data: " << b << endl;
