@@ -9,7 +9,7 @@
 #include <sstream>
 #include <string>
 
-void setSeqNum(bool sn, Packet * packet) {
+void setSeqNum(int sn, Packet * packet) {
 	packet->seqNum = sn;
 }
 
@@ -69,11 +69,11 @@ char*  getData(Packet packet) {
 	return packet.data;
 }
 
-void createPacket(int sn, const char data[254], Packet * packet) {
+void createPacket(int sn, const char data[249], Packet * packet) {
 	packet->seqNum = (sn + 1) % 2;
-	packet->ckSum = generateCkSum(*packet);
 	strcpy(packet->data, data);
-
+	packet->ckSum = generateCkSum(*packet);
+	packet->ack = 0;
 }
 
 char* str(Packet packet) {
