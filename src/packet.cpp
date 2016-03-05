@@ -7,7 +7,10 @@
 
 #include "packet.h"
 #include <sstream>
+#include <iostream>
 #include <string>
+
+using namespace std;
 
 void setSeqNum(int sn, Packet * packet) {
 	packet->seqNum = sn;
@@ -80,20 +83,25 @@ char* str(Packet packet) {
 	std::string tempStr(packet.data);
 	std::string packetString;
 	std::string csStr;
-
+	
 	std::stringstream stream;
-	stream << (long long) packet.ckSum;
+	stream << (long long int) packet.ckSum;
 	csStr = stream.str();
+
 	while (csStr.length() < 5) csStr += '0';
 
-	stream.clear();
-	stream << (long long) packet.seqNum;
+	std::stringstream snhold;
+	
+	snhold << (long long int) packet.seqNum;
+
 	std::stringstream ackhold;
-	ackhold << (long long) packet.ack;
+	ackhold << (long long int) packet.ack;
 
-	packetString = stream.str() + csStr + ackhold.str() + tempStr;
+
+	packetString = snhold.str() + csStr + ackhold.str() + tempStr;
 	strcpy(packet.packet, packetString.c_str());
-
+	
+	cout << endl << "This is the value sent from the str() method" << packet.packet << endl;
 	return packet.packet;
 }
 

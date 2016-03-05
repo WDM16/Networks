@@ -15,10 +15,11 @@
 #include <iostream>
 #include <time.h>
 #include <strings.h>
+#include <sstream>
 #include "packet.h"
 
 #define PORT 10038
-#define PAKSIZE 128
+#define PAKSIZE 256
 #define ACK 0
 #define NAK 1
 
@@ -37,6 +38,7 @@ bool isvpack(unsigned char * p) {
 
   char * css = new char[6];
   memcpy(css, &p[1], 6);
+  css[5] = '\0';
 
   char * db = new char[249 + 1];
   memcpy(db, &p[7], 249);
@@ -50,11 +52,20 @@ bool isvpack(unsigned char * p) {
   int cs = atoi(css);
 
   Packet pk;
-  createPacket(sn, db, &pk);
+  createPacket(0, db, &pk);
+  setSeqNum(sn, &pk);
 
+  std::stringstream s;
+  s << sn;
+  s << " ";
+  s << seqNum;
+
+  std::stringstream c;
+  c << cs << " " << generateCkSum;
   // change to validate based on checksum and sequence number
-
+  cout << endl << "The sn and seq Num are " << s.str() <<  endl;
   if(sn == seqNum) return false;
+  cout << endl << "The cs and ckSum are "<< c << endl;
   if(cs != generateCkSum(pk)) return false;
   return true;
 }
@@ -114,7 +125,7 @@ int main() {
     packet[PAKSIZE] = '\0';
     if (rlen > 0) {
       char * css = new char[6];
-      memcpy(css, &packet[1], 5);
+      memcpy(css, &packet[1], 6);
       css[5] = '\0';
       cout << endl << endl << "=== RECEIPT" << endl;
       cout << "Seq. num: " << packet[0] << endl;
@@ -142,7 +153,8 @@ int main() {
       }
       setCkSum(atoi(css), &p);
       setAck(ack, &p);
-
+	
+      cout << "dataPull right before being sent through str method" << dataPull << endl;
       if(sendto(s, str(p), PAKSIZE, 0, (struct sockaddr *)&ca, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;

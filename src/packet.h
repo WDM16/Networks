@@ -14,9 +14,9 @@
 #include <iostream>
 
 struct Packet {
-	bool seqNum = 0;
-	int ckSum = 0;
-	int ack = 0;
+	bool seqNum;
+	int ckSum;
+	int ack;
 	char data[247];
 	std::string info;
 	std::string temp;

@@ -21,7 +21,7 @@
 //This is the size of the Packet minus the size of the header.
 #define BUFSIZE 249
 //Name of the file that the server contains.
-#define FILENAME "testfile.txt"
+#define FILENAME "All.txt"
 
 using namespace std;
 
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
 
 	        //get the data from the received message.
 	        char * db = new char[BUFSIZE + 1];
-	        memcpy(db, &b[7], BUFSIZE);
+	        memcpy(db, &b[2], BUFSIZE);
 	        db[BUFSIZE] = '\0';
 
 	        //Print out sequence number and checksum
@@ -280,7 +280,7 @@ bool gremlin(Packet *packet, int pCorr, int plost) {
 		else {
 			seqNum = true;
 		}
-		cout << "Sequence number: " << getSeqNum(*packet) << endl;
+		cout << "Sequence number: " << packet->seqNum << endl;
 		cout << "Checksum: " << getCkSum(*packet) << endl;
 		cout << "Message: "  << getData(*packet) << endl;
 	}
