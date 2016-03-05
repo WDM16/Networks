@@ -25,7 +25,7 @@
 #define BUFSIZE 249
 #define ACK 0
 #define NAK 1
-#define FILENAME "All.txt"
+#define FILENAME "Some.txt"
 
 using namespace std;
 
@@ -123,18 +123,19 @@ int main(int argc, char** argv) {
 
       cout << endl << endl;
 
-  ofstream file("Dumpfile");
+  ofstream file("Dumpfile.txt");
 
-  //If the packet does not get dropped send it.
-  if(sendto(s, FILENAME, strlen(FILENAME), 0, (struct sockaddr *)&server, sizeof(server)) < 0) {
+  char filename[] = FILENAME;
+
+  cout << endl << "Filename sent to Server" << filename << endl;
+  if(sendto(s, filename, strlen(FILENAME), 0, (struct sockaddr *)&server, sizeof(server)) < 0) {
       cout << "Package sending failed. (socket s, client address client, message m)" << endl;
       return 0;
   }
 
 
   bool isSeqNumSet = false;
-  for (;;) {
-
+	for(;;) {
     unsigned char packet[PAKSIZE + 1];
     unsigned char dataPull[PAKSIZE - 7 + 1];
     //Wait for a message from the client to see if the packet was received correctly
@@ -172,7 +173,12 @@ int main(int argc, char** argv) {
       } else {
         ack = NAK;
       }
-      cout << ((ack == ACK) ? "ACK" : "NAK") << endl;
+      if (ack == ACK) {
+        cout << "ACK" << endl;
+      }
+      else {
+ 	cout << "NAK" << endl;
+      }
       Packet p;
       if (seqNum) {
           createPacket(false, reinterpret_cast<const char *>(dataPull), &p);
@@ -182,14 +188,14 @@ int main(int argc, char** argv) {
       setCkSum(atoi(css), &p);
       setAck(ack, &p);
 	
-      cout << "dataPull right before being sent through str method" << dataPull << endl;
       if(sendto(s, str(p), PAKSIZE, 0, (struct sockaddr *)&server, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
       }
       delete css;
+      file.flush();
     }
-  }
   file.close();
+}
 }
 

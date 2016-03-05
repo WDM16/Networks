@@ -101,7 +101,6 @@ char* str(Packet packet) {
 	packetString = snhold.str() + csStr + ackhold.str() + tempStr;
 	strcpy(packet.packet, packetString.c_str());
 	
-	cout << endl << "This is the value sent from the str() method" << packet.packet << endl;
 	return packet.packet;
 }
 

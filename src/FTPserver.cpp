@@ -26,8 +26,6 @@
 #define PORT 10038
 #define ACK 0
 #define NAK 1
-//Name of the file that the server contains.
-#define FILENAME "All.txt"
 
 using namespace std;
 
@@ -91,9 +89,13 @@ int main(int argc, char** argv) {
     cout << "Waiting on port " << PORT << "..." << endl;
 
     for (;;) {
-        unsigned char filename[256];
+        char filename[256];
         rlen = recvfrom(s, filename, PAKSIZE, 0, (struct sockaddr *) &client,
                 &salen);
+
+        filename[rlen] = '\0';
+
+	cout << endl << "This is the name of the file received" << filename << endl;
 
         const char * fn = reinterpret_cast<const char *>(filename);
         //Open specific file for reading.
@@ -193,12 +195,13 @@ int main(int argc, char** argv) {
                 sns[1] = '\0';
 
                 //Get the checksum from the message
-                char * css = new char[5];
-                memcpy(css, &b[1], 5);
+                char * css = new char[6];
+                memcpy(css, &b[1], 6);
+		css[5] = '\0';
 
                 //get the data from the received message.
                 char * db = new char[BUFSIZE + 1];
-                memcpy(db, &b[2], BUFSIZE);
+                memcpy(db, &b[7], BUFSIZE);
                 db[BUFSIZE] = '\0';
 
                 //Print out sequence number and checksum
@@ -237,7 +240,6 @@ int main(int argc, char** argv) {
 }
 
 bool gremlin(Packet *packet, int pCorr, int plost) {
-    srand(time(NULL));
     bool drop = false;
     int r = rand() % 100 + 1;
 
@@ -249,7 +251,7 @@ bool gremlin(Packet *packet, int pCorr, int plost) {
         int d = rand() % 101;
         if (d <= 70) {
             int c = rand() % 256;
-            packet->packet[c] = '\n';
+            packet->packet[c] = '\0';
         } else if (d <= 90) {
             int c = rand() % 256;
             int d = rand() % 256;
