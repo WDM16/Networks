@@ -18,10 +18,14 @@
 #include <sstream>
 #include "packet.h"
 
+//This is the line that displays if there are not 2 parameters input.
+#define USAGE "Usage:\r\nc [tux machine number]"
 #define PORT 10038
 #define PAKSIZE 256
+#define BUFSIZE 249
 #define ACK 0
 #define NAK 1
+#define FILENAME "All.txt"
 
 using namespace std;
 
@@ -55,29 +59,32 @@ bool isvpack(unsigned char * p) {
   createPacket(0, db, &pk);
   setSeqNum(sn, &pk);
 
-  std::stringstream s;
-  s << sn;
-  s << " ";
-  s << seqNum;
-
-  std::stringstream c;
-  c << cs << " " << generateCkSum;
-  // change to validate based on checksum and sequence number
-  cout << endl << "The sn and seq Num are " << s.str() <<  endl;
-  if(sn == seqNum) return false;
-  cout << endl << "The cs and ckSum are "<< c << endl;
+  if(sn != seqNum) return false;
   if(cs != generateCkSum(pk)) return false;
   return true;
 }
 
-int main() {
-  struct sockaddr_in a;
-  struct sockaddr_in ca;
-  socklen_t calen = sizeof(ca);
-  int rlen;
-  int s;
-  bool ack;
-  seqNum = true;
+int main(int argc, char** argv) {
+
+
+    struct sockaddr_in server;
+    struct sockaddr_in client;
+    socklen_t calen = sizeof(server);
+
+
+    int rlen;
+    int s;
+    bool ack;
+    seqNum = true;
+
+  //If there correct amount of arguement are not input, the method will end.
+  if(argc != 2) {
+      cout << USAGE << endl;
+      return 1;
+  }
+
+  //Uses the param (tux number) to append to the known ip of Auburn machine.
+  string hs = string("131.204.14.") + argv[1];
 
   /* Create our socket. */
   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -91,27 +98,48 @@ int main() {
    *
    */
 
-  memset((char *)&a, 0, sizeof(a));
-  a.sin_family = AF_INET;
-  a.sin_addr.s_addr = htonl(INADDR_ANY);
-  a.sin_port = htons(PORT);
+  memset((char *)&client, 0, sizeof(client));
+  client.sin_family = AF_INET;
+  client.sin_addr.s_addr = htonl(INADDR_ANY);
+  client.sin_port = htons(PORT);
 
-  if (bind(s, (struct sockaddr *)&a, sizeof(a)) < 0) {
+  if (bind(s, (struct sockaddr *)&client, sizeof(client)) < 0) {
     cout << "Socket binding failed. (socket s, address a)" << endl;
     return 0;
   }
 
-  /* Loop forever, waiting for messages from a client. */
+  //Initialize the client information. the sin_addr is set from the hs string up to along with the
+  //tux machine number input in the first parameter.
+  memset((char *)&server, 0, sizeof(server));
+  server.sin_family = AF_INET;
+  server.sin_port = htons(PORT);
+  inet_pton(AF_INET, hs.c_str(), &(server.sin_addr));
 
-  cout << "Waiting on port " << PORT << "..." << endl;
+  cout << endl;
+
+  //Prints the address of the machine it wants to send it to.
+      cout << "Server address (inet mode): " << inet_ntoa(server.sin_addr) << endl;
+      cout << "Port: " << ntohs(server.sin_port) << endl;
+
+      cout << endl << endl;
 
   ofstream file("Dumpfile");
 
+  //If the packet does not get dropped send it.
+  if(sendto(s, FILENAME, strlen(FILENAME), 0, (struct sockaddr *)&server, sizeof(server)) < 0) {
+      cout << "Package sending failed. (socket s, client address client, message m)" << endl;
+      return 0;
+  }
+
+
   bool isSeqNumSet = false;
   for (;;) {
+
     unsigned char packet[PAKSIZE + 1];
     unsigned char dataPull[PAKSIZE - 7 + 1];
-    rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
+    //Wait for a message from the client to see if the packet was received correctly
+    rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&server, &calen);
+
     if(!isSeqNumSet) {
       isSeqNumSet = true;
       char * str = new char[1];
@@ -155,7 +183,7 @@ int main() {
       setAck(ack, &p);
 	
       cout << "dataPull right before being sent through str method" << dataPull << endl;
-      if(sendto(s, str(p), PAKSIZE, 0, (struct sockaddr *)&ca, calen) < 0) {
+      if(sendto(s, str(p), PAKSIZE, 0, (struct sockaddr *)&server, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
       }
