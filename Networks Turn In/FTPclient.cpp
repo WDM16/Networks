@@ -17,6 +17,24 @@
 #include <strings.h>
 #include <sstream>
 #include "packet.h"
+#include<ctime>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <numeric>
+#include <vector>
+#include <cstdlib>
+#include <netdb.h>
+
+#define ll long long int
+using namespace std;
+using std::cout;
+using std::endl;
 
 //This is the line that displays if there are not 2 parameters input.
 #define USAGE "Usage:\r\nc [tux machine number]"
